@@ -3,9 +3,11 @@
 An interactive 3D visualization of the Solar System built with [three.js](https://threejs.org/).
 Open the single HTML file in any modern browser — no build step required.
 
+**Live demo (GitHub Pages):** https://iosonolatte.github.io/interactive-solar-system/
+
 ## Run it
 
-Just open `solar-system.html` in a browser. three.js is loaded from a CDN via an import map,
+Just open `index.html` in a browser. three.js is loaded from a CDN via an import map,
 so you need an internet connection on first load.
 
 To serve it locally (optional):
@@ -13,7 +15,7 @@ To serve it locally (optional):
 ```bash
 # Python
 python -m http.server 8000
-# then visit http://localhost:8000/solar-system.html
+# then visit http://localhost:8000/index.html
 ```
 
 ## Controls
