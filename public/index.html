@@ -88,7 +88,7 @@
     background: rgba(10,16,30,.88); border: 2px solid rgba(160,195,255,.7);
     box-shadow: 0 0 16px rgba(90,150,255,.55), 0 3px 12px rgba(0,0,0,.6);
     white-space: nowrap; transform: translateY(-3px);
-    pointer-events: none; text-shadow: 0 1px 4px rgba(0,0,0,.95); user-select: none;
+    pointer-events: auto; cursor: pointer; text-shadow: 0 1px 4px rgba(0,0,0,.95); user-select: none;
   }
   .label.sun { color: #fff0c2; border-color: rgba(255,205,100,.85); box-shadow: 0 0 20px rgba(255,190,80,.65), 0 3px 12px rgba(0,0,0,.6); }
 
@@ -283,15 +283,11 @@
       div.className = 'label' + (isSun ? ' sun' : '');
       div.textContent = text;
       if (accent) div.style.borderLeft = `3px solid ${accent}`;
+      div.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectObject(parent);              // tapping the label = inspect + focus
+      });
       const r = parent.geometry.parameters.radius;
-      const stemH = 3;
-      const sw = Math.max(0.1, r*0.05);
-      const stem = new THREE.Mesh(
-        new THREE.CylinderGeometry(sw, sw, stemH, 6),
-        new THREE.MeshBasicMaterial({ color: accent ? new THREE.Color(accent) : 0xffffff, transparent:true, opacity:0.55 })
-      );
-      stem.position.y = r + stemH/2;
-      parent.add(stem);
       const obj = new CSS2DObject(div);
       obj.position.set(0, r + 3, 0);
       parent.add(obj);
