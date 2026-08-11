@@ -1,0 +1,8 @@
+# WorkBuddy project data (not source)
+.workbuddy/
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
