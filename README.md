@@ -1,5 +1,7 @@
 # Interactive Solar System 🪐
 
+![Solar system preview](./assets/preview.png)
+
 An interactive 3D visualization of the Solar System built with [three.js](https://threejs.org/).
 Open the single HTML file in any modern browser — no build step required.
 

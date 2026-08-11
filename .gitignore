@@ -1,6 +1,9 @@
 # WorkBuddy project data (not source)
 .workbuddy/
 
+# Screenshot scratch dir (Edge profile, modified copy of index.html)
+.shot/
+
 # OS / editor junk
 .DS_Store
 Thumbs.db
