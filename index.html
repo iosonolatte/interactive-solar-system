@@ -206,6 +206,7 @@
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
     renderer.setSize(innerWidth, innerHeight);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.setClearColor(0x05070f); // match body background so empty space blends
 
     const labelRenderer = new CSS2DRenderer();
     labelRenderer.setSize(innerWidth, innerHeight);
@@ -308,8 +309,7 @@
       const tex = new THREE.CanvasTexture(c);
       const m = new THREE.MeshBasicMaterial({ map:tex, side:THREE.DoubleSide, transparent:true, opacity:0.8 });
       const ring = new THREE.Mesh(g, m);
-      ring.rotation.x = -Math.PI/2 + (planet.tilt? (planet.tilt*Math.PI/180):0)*0.0;
-      ring.rotation.x = -Math.PI/2;
+      ring.rotation.x = -Math.PI/2; // flat in local plane; axial tilt applied on parent mesh
       return ring;
     }
 
@@ -343,6 +343,7 @@
       let moonPivot = null, moonMesh = null;
       if (p.hasMoon){
         moonPivot = new THREE.Object3D();
+        moonPivot.position.x = p.dist; // sit at the planet's position (set once)
         pivot.add(moonPivot);
         moonMesh = new THREE.Mesh(new THREE.SphereGeometry(0.7, isMobile?16:24, isMobile?16:24), new THREE.MeshStandardMaterial({color:0xbfbfbf, roughness:1}));
         moonMesh.position.x = p.radius + 3;
@@ -509,20 +510,19 @@
     // ---------- Animation ----------
     const clock = new THREE.Clock();
     const tmp = new THREE.Vector3();
+    const desired = new THREE.Vector3();
 
     function animate(){
       requestAnimationFrame(animate);
       const dt = Math.min(clock.getDelta(), 0.05);
 
-      sun.rotation.y += 0.0015;
-
       if (playing){
+        sun.rotation.y += 0.0015;
         planetObjs.forEach(o => {
           o.angle += dt * (0.5 / o.data.period) * speed * 0.3;
           o.pivot.rotation.y = o.angle;
           o.mesh.rotation.y += o.data.spin * speed;
           if (o.moonPivot){
-            o.moonPivot.position.copy(o.mesh.position); // follow planet in pivot frame
             o.moonPivot.rotation.y += dt * 1.2 * speed;
           }
         });
@@ -534,17 +534,18 @@
         belt.rotation.y += dt * 0.02 * speed;
       }
 
-      // camera focus follow
+      // camera focus follow (maintain offset even after the fly-in transition ends)
       if (focusTarget){
         focusTarget.getWorldPosition(tmp);
         if (focusTransition < 1){
           focusTransition = Math.min(1, focusTransition + dt*1.2);
-          const desired = tmp.clone().add(new THREE.Vector3(0, focusTarget.geometry.parameters.radius*3 + 8, focusTarget.geometry.parameters.radius*3 + 18));
-          camera.position.lerp(desired, 0.08);
           controls.target.lerp(tmp, 0.1);
         } else {
           controls.target.copy(tmp);
         }
+        const r = focusTarget.geometry.parameters.radius;
+        desired.set(0, r*3 + 8, r*3 + 18).add(tmp);
+        camera.position.lerp(desired, 0.08);
       }
 
       controls.update();
@@ -563,6 +564,17 @@
 
     // hide loader
     setTimeout(() => document.getElementById('loader').classList.add('hide'), 350);
+  </script>
+  <script>
+    // Standalone (non-module) fallback: if the module script above fails to load
+    // three.js (e.g. CDN blocked or offline), surface a message instead of spinning forever.
+    window.addEventListener('error', function () {
+      var l = document.getElementById('loader');
+      if (l) {
+        l.classList.remove('hide');
+        l.innerHTML = '<span style="color:#ff9b9b">加载 three.js 失败，请检查网络后刷新</span>';
+      }
+    }, true);
   </script>
 </body>
 </html>
