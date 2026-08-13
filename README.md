@@ -9,16 +9,17 @@ Open the single HTML file in any modern browser — no build step required.
 
 ## Run it
 
-Just open `index.html` in a browser. three.js is loaded from a CDN via an import map,
-so you need an internet connection on first load.
-
-To serve it locally (optional):
+three.js is bundled locally under `vendor/` (wired up via an import map), so **no internet or CDN
+is needed** — the app runs fully offline. Because ES modules are blocked under the `file://`
+protocol, serve the folder with any static server:
 
 ```bash
 # Python
 python -m http.server 8000
-# then visit http://localhost:8000/index.html
+# then visit http://localhost:8000
 ```
+
+Or just open the live GitHub Pages demo above.
 
 ## Controls
 
@@ -44,7 +45,7 @@ moon count, a fun fact) and the camera smoothly flies to and follows it.
 - **Asteroid belt** between Mars and Jupiter (~2,400 particles).
 - **5 dwarf planets** — Ceres (in the belt), Pluto, Haumea, Makemake, Eris (beyond Neptune).
 - **Starfield** background (~6,000 stars).
-- **CSS2D labels** with glowing pills, per-body color accents, and leader stems.
+- **CSS2D labels** — glowing pills with per-body color accents; clickable/tappable (and keyboard-accessible) to inspect + focus a body.
 
 ## Data accuracy
 

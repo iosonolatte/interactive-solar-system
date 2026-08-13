@@ -4,6 +4,11 @@
 # Screenshot scratch dir (Edge profile, modified copy of index.html)
 .shot/
 
+# Temp verification / headless browser profile dirs
+.verify-*
+verify.png
+.verify.png
+
 # OS / editor junk
 .DS_Store
 Thumbs.db
