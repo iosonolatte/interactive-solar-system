@@ -83,6 +83,7 @@
 
   /* Planet labels */
   .label {
+    font-family: inherit; appearance: none; -webkit-appearance: none;
     color: #ffffff; font-size: 14px; font-weight: 700; letter-spacing: .5px;
     padding: 4px 11px; border-radius: 10px;
     background: rgba(10,16,30,.88); border: 2px solid rgba(160,195,255,.7);
@@ -163,8 +164,8 @@
   <script type="importmap">
   {
     "imports": {
-      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      "three": "./vendor/three/build/three.module.js",
+      "three/addons/": "./vendor/three/examples/jsm/"
     }
   }
   </script>
@@ -280,16 +281,18 @@
     scene.add(planetGroup);
 
     function addLabel(parent, text, isSun, accent){
-      const div = document.createElement('div');
-      div.className = 'label' + (isSun ? ' sun' : '');
-      div.textContent = text;
-      if (accent) div.style.borderLeft = `3px solid ${accent}`;
-      div.addEventListener('click', (e) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'label' + (isSun ? ' sun' : '');
+      btn.textContent = text;
+      btn.setAttribute('aria-label', text);
+      if (accent) btn.style.borderLeft = `3px solid ${accent}`;
+      btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        selectObject(parent);              // tapping the label = inspect + focus
+        selectObject(parent);              // tapping/activating the label = inspect + focus
       });
       const r = parent.geometry.parameters.radius;
-      const obj = new CSS2DObject(div);
+      const obj = new CSS2DObject(btn);
       obj.position.set(0, r + 3, 0);
       parent.add(obj);
       return obj;
@@ -480,21 +483,27 @@
     if (!showLabels){ labelRenderer.domElement.style.display = 'none'; labelsBtn.classList.remove('active'); }
     const speedInput = document.getElementById('speed');
     const speedVal = document.getElementById('speedVal');
+    playBtn.setAttribute('aria-pressed', String(playing));
+    orbitsBtn.setAttribute('aria-pressed', String(showOrbits));
+    labelsBtn.setAttribute('aria-pressed', String(showLabels));
 
     playBtn.onclick = () => {
       playing = !playing;
       playBtn.textContent = playing ? '⏸ Pause' : '▶ Play';
       playBtn.classList.toggle('active', playing);
+      playBtn.setAttribute('aria-pressed', String(playing));
     };
     orbitsBtn.onclick = () => {
       showOrbits = !showOrbits;
       orbitRings.forEach(o => o.visible = showOrbits);
       orbitsBtn.classList.toggle('active', showOrbits);
+      orbitsBtn.setAttribute('aria-pressed', String(showOrbits));
     };
     labelsBtn.onclick = () => {
       showLabels = !showLabels;
       labelRenderer.domElement.style.display = showLabels ? '' : 'none';
       labelsBtn.classList.toggle('active', showLabels);
+      labelsBtn.setAttribute('aria-pressed', String(showLabels));
     };
     speedInput.oninput = () => {
       const v = parseFloat(speedInput.value);
@@ -508,6 +517,12 @@
     };
 
     // ---------- Animation ----------
+    // Orbital rate: real periods would freeze the outer planets (Neptune 165 yr vs
+    // Mercury 0.24 yr), so we compress the ratio with period^0.4 — keeps every planet
+    // visibly revolving while preserving the inner-faster-than-outer ordering.
+    function orbitalRate(period){ return 1 / Math.pow(period, 0.4); }
+    const RATE = 2.0;   // nominal scale: Neptune ~2.3 min / Jupiter ~47 s per orbit at default speed
+
     const clock = new THREE.Clock();
     const tmp = new THREE.Vector3();
     const desired = new THREE.Vector3();
@@ -519,7 +534,7 @@
       if (playing){
         sun.rotation.y += 0.0015;
         planetObjs.forEach(o => {
-          o.angle += dt * (0.5 / o.data.period) * speed * 0.3;
+          o.angle += dt * orbitalRate(o.data.period) * speed * RATE;
           o.pivot.rotation.y = o.angle;
           o.mesh.rotation.y += o.data.spin * speed;
           if (o.moonPivot){
@@ -527,7 +542,7 @@
           }
         });
         dwarfObjs.forEach(o => {
-          o.angle += dt * (0.5 / o.data.period) * speed * 0.3;
+          o.angle += dt * orbitalRate(o.data.period) * speed * RATE;
           o.pivot.rotation.y = o.angle;
           o.mesh.rotation.y += o.data.spin * speed;
         });
